@@ -177,13 +177,19 @@ version_test()
 
 configure_test()
 {
+    if [ -z $MACADDR ]
+    then
+        echo "Have not determined the MAC address - first run scanmacaddrs(), and then run findmac()."
+		return 4
+    fi
+
     local attempts=0
 
     until [ $attempts -ge $RETRIES ]
     do
         attempts=$[$attempts+1]
 
-        sudo LOGXI=* ./ziggy --prod client setup --lid="$LOCATIONID" $MACADDRDECONFIGURED > $SETUPRESULTS
+        sudo LOGXI=* ./ziggy --prod client setup --lid="$LOCATIONID" $MACADDR > $SETUPRESULTS
 
         grep -q "client error connecting" $SETUPRESULTS
         if [ $? -eq 0 ]
@@ -237,13 +243,19 @@ setup()
 
 deconfigure_test()
 {
+    if [ -z $MACADDR ]
+    then
+        echo "Have not determined the MAC address - first run scanmacaddrs(), and then run findmac()."
+		return 4
+    fi
+
     local attempts=0
 
     until [ $attempts -ge $RETRIES ]
     do
         attempts=$[$attempts+1]
 
-        sudo ./ziggy --prod client clear $MACADDRCONFIGURED > $CLEARRESULTS
+        sudo ./ziggy --prod client clear $MACADDR > $CLEARRESULTS
 
         grep -q "client error connecting" $CLEARRESULTS
         if [ $? -eq 0 ]
