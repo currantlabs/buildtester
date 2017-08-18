@@ -189,6 +189,8 @@ configure_test()
     do
         attempts=$[$attempts+1]
 
+		sudo rm -f $SETUPRESULTS
+
         sudo LOGXI=* ./ziggy --prod client setup --lid="$LOCATIONID" $MACADDR > $SETUPRESULTS
 
         grep -q "client error connecting" $SETUPRESULTS
