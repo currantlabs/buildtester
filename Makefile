@@ -13,6 +13,8 @@ ARCHIVE_FILES=                  \
     jenkinspoll.go              \
     jenkinspoll                 \
     jenkinspoll_linux           \
+    test_latest_build.bash      \
+    jenkinstest.bash            \
     killscript.bash             \
     checkstatus.bash            \
     ble-console                 \
