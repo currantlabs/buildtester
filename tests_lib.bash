@@ -44,24 +44,26 @@ sudo LOGXI=* ./ziggy --prod login $LOGINID $LOGINPASSWD
 
 reset_ble()
 {
-    log "reset_ble(): Before reset of device \"sudo hcitool dev\" says:"
-    echo "-------- -------- -------- --------" >> $LOGFILE
-    sudo hcitool dev >> $LOGFILE
-    echo "-------- -------- -------- --------" >> $LOGFILE
+	log "reset_ble() call has been disabled"
 
-    sudo hciconfig hci0 reset
+    # log "reset_ble(): Before reset of device \"sudo hcitool dev\" says:"
+    # echo "-------- -------- -------- --------" >> $LOGFILE
+    # sudo hcitool dev >> $LOGFILE
+    # echo "-------- -------- -------- --------" >> $LOGFILE
 
-	sudo hciconfig hci0 up
+    # sudo hciconfig hci0 reset
 
-    log "reset_ble(): After \"sudo hciconfig hci0 up\", running \"sudo hciconfig\" says:"
-    echo "-------- -------- -------- --------" >> $LOGFILE
-    sudo hciconfig >> $LOGFILE
-    echo "-------- -------- -------- --------" >> $LOGFILE
+	# sudo hciconfig hci0 down
 
-    log "reset_ble(): After reset of device \"sudo hcitool dev\" says:"
-    echo "-------- -------- -------- --------" >> $LOGFILE
-    sudo hcitool dev >> $LOGFILE
-    echo "-------- -------- -------- --------" >> $LOGFILE
+    # log "reset_ble(): After \"sudo hciconfig hci0 down\", running \"sudo hciconfig\" says:"
+    # echo "-------- -------- -------- --------" >> $LOGFILE
+    # sudo hciconfig >> $LOGFILE
+    # echo "-------- -------- -------- --------" >> $LOGFILE
+
+    # log "reset_ble(): After reset of device \"sudo hcitool dev\" says:"
+    # echo "-------- -------- -------- --------" >> $LOGFILE
+    # sudo hcitool dev >> $LOGFILE
+    # echo "-------- -------- -------- --------" >> $LOGFILE
 
 }
 
@@ -556,35 +558,52 @@ test_latest_build()
 
     # OK -- we've got the current MAC address for our outlet, on to the tests:
 
-    sleep 5
+	TESTLEVEL=`cat .$TESTBUILD`
+	log "Currently have completed $TESTLEVEL of 2 tests against Jenkins Build number $TESTBUILD (file $FWIMAGE)"
 
-	log "Starting ota_test() for build number $TESTBUILD"
-    # \_\_\_\_ \_\_\_\_ \_\_\_\_ \_\_\_\_ \_\_\_\_ \_\_\_\_
-    # Test 1/4 - Attempt an OTA update with the latest build:
-    ota_test
-    if [ $? -eq 0 ]
-    then
-        log "ota_test() succeeded for build number $TESTBUILD"
-    else
-        log "ota_test() failed for build number $TESTBUILD"
-        return 1
-    fi
+	if [ $TESTLEVEL -eq 0 ]
+	then
 
-    sleep 5
+		sleep 5
 
-	log "Starting version_test() for build number $TESTBUILD"
-    # \_\_\_\_ \_\_\_\_ \_\_\_\_ \_\_\_\_ \_\_\_\_ \_\_\_\_
-    # Test 2/4 - Query the outlet for its version number to
-    # see if it matches the version (git commit sha) of the
-    # file that was OTA udpated:
-    version_test
-    if [ $? -eq 0 ]
-    then
-        log "version_test() succeeded for build number $TESTBUILD"
-    else
-        log "version_test() failed for build number $TESTBUILD"
-        return 2
-    fi
+		log "Starting ota_test() for build number $TESTBUILD"
+		# \_\_\_\_ \_\_\_\_ \_\_\_\_ \_\_\_\_ \_\_\_\_ \_\_\_\_
+		# Test 1/4 - Attempt an OTA update with the latest build:
+		ota_test
+		if [ $? -eq 0 ]
+		then
+			log "ota_test() succeeded for build number $TESTBUILD"
+			echo "1" > .$LATESTBUILD
+		else
+			log "ota_test() failed for build number $TESTBUILD"
+			return 1
+		fi
+	fi
+
+
+	if [ $TESTLEVEL -eq 1 ]
+	then
+
+		# Bring the hci0 interface down before trying again
+		sudo hciconfig hci0 down
+
+		sleep 5
+
+		log "Starting version_test() for build number $TESTBUILD"
+		# \_\_\_\_ \_\_\_\_ \_\_\_\_ \_\_\_\_ \_\_\_\_ \_\_\_\_
+		# Test 2/4 - Query the outlet for its version number to
+		# see if it matches the version (git commit sha) of the
+		# file that was OTA udpated:
+		version_test
+		if [ $? -eq 0 ]
+		then
+			log "version_test() succeeded for build number $TESTBUILD"
+			echo "2" > .$LATESTBUILD
+		else
+			log "version_test() failed for build number $TESTBUILD"
+			return 2
+		fi
+	fi
 
 
 	log "Skipping configure/deconfigure tests for build number $TESTBUILD (still unstable)"
