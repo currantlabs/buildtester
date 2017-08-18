@@ -16,7 +16,7 @@ LOCATIONID=`cat location-id.txt`
 MACADDRSCANRESULTS="/tmp/macaddrs"
 SETUPRESULTS="/tmp/setup"
 CLEARRESULTS="/tmp/clear"
-BUILDNO=49
+BUILDNO=62
 RETRIES=5
 FWBURNTIME=30
 
@@ -27,8 +27,8 @@ FWBURNTIME=30
 
 # echo "Welcome to test_latest_build()"
 
-FWIMAGE=`find $BUILDNO -iname "*.img.gz"`
-rm -f $MACADDRSCANRESULTS
+FWIMAGE=`find $BUILDNO -iname "app*.img.gz"`
+sudo rm -f $MACADDRSCANRESULTS
 
 if [ -z $LOGINPASSWD ]
 then
@@ -80,7 +80,7 @@ ota_test()
     # Takes about 15 seconds for the outlet to complete FW update
     # once the data has been sent OTA, so give the outlet a chance
     # to finish before checking the result:
-    # echo "Waiting for hardware to flash the new application image..."
+    #echo "Waiting for hardware to flash the new application image..."
     sleep $FWBURNTIME
 
     return 0
@@ -116,7 +116,7 @@ version_test()
     do
         attempts=$[$attempts+1]
 
-		sudo ./ble-console -addr $MACADDR -command version | tee $RESULTFILE > /dev/null 
+		sudo ./ble-console -addr $MACADDR -command version | sudo tee $RESULTFILE > /dev/null 
 
         OUTPUTSIZE=`stat --format="%s" $RESULTFILE`
 
@@ -127,7 +127,7 @@ version_test()
             then
                 break
             else
-				reset_ble
+		reset_ble
                 sleep 2
 				continue
             fi
@@ -281,7 +281,7 @@ deconfigure_test()
     
 }
 
-clear()
+deconfigure()
 {
     deconfigure_test
 
@@ -360,7 +360,7 @@ findmac()
 {
     if [ ! -e $MACADDRSCANRESULTS ]
     then
-        echo "Must scan for MAC addresses before you can determine the device's current MAC address."
+        echo "Must scan for MAC addresses (call scanmacaddrs()) before you can determine the device's current MAC address."
         return 1
     fi
 
@@ -430,7 +430,7 @@ mac()
 {
     if [ -z $MACADDR ]
     then
-        echo "Have not determined the MAC address"
+        echo "Have not determined the MAC address - first run scanmacaddrs(), and then run findmac()."
     else
         echo "The MAC address is $MACADDR"
     fi
@@ -454,3 +454,15 @@ getbl()
 }
 
 
+# OK, this is the code that is actually _run_ when the file is sourced:
+echo -n "Determining the MAC address of the unit under test..."
+scanmacaddrs
+findmac
+if [ -z $MACADDR ]
+then
+    echo
+    echo "Could not determine the MAC address of the unit under test - check your setup."
+    exit 1
+else
+    echo "MAC address of the device under test is $MACADDR"
+fi
