@@ -102,6 +102,7 @@ do
 		get_latest_build
 		if [ $? -eq 0 ]
 		then
+			echo "0" > .$LATESTBUILD
 			while [ 1 ]
 			do
 				test_latest_build $LATESTBUILD
