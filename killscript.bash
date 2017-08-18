@@ -5,7 +5,7 @@ readonly LOCKFILE=/tmp/buildtester-lockfile
 
 SCRIPTNAME="buildtester.bas"
 
-PROCESSID=`ps | grep $SCRIPTNAME | grep -v grep | grep $SCRIPTNAME | sed 's/\([0-9]\) .*/\1/'`
+PROCESSID=`ps -e | grep $SCRIPTNAME | grep -v grep | grep $SCRIPTNAME | sed 's/\([0-9]\) .*/\1/'`
 
 if [ -z $PROCESSID ]
 then
