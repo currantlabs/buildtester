@@ -117,6 +117,9 @@ do
 		else
 			log "Failed to download build number $LATESTBUILD and so aborting tests"
 		fi
+	else
+	    log "We've already downloaded Jenkins Build Number $LATESTBUILD - so test it directly"
+	    test_latest_build $LATESTBUILD
 	fi
 
 	sleep $POLLING_INTERVAL
